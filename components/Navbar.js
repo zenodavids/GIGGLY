@@ -1,8 +1,11 @@
 // Importing the necessary dependencies from React and Next.js
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
+import Greetings from './Greetings'
 import { CgMenuGridR } from 'react-icons/cg'
 import { AiOutlineClose } from 'react-icons/ai'
+import { useSession, signIn, signOut } from 'next-auth/react'
 
 // This component renders individual items in the navigation bar
 const NavBarItem = ({ title, classprops, link }) => (
@@ -20,24 +23,46 @@ export const Navbar = (props) => {
   // Creating a state variable to toggle the mobile menu
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  const { data: session, status } = useSession()
+  const loading = status === 'loading'
+
+  const handleSignin = (e) => {
+    e.preventDefault()
+    signIn()
+  }
+
+  const handleSignout = (e) => {
+    e.preventDefault()
+    signOut()
+  }
+
   return (
     // Creating a container element for the entire navigation bar
     <div className='px-4 py-5 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8'>
       <div className='relative flex items-center justify-between'>
         {/* Creating a Logo for the Navbar */}
-        <Link
-          href='/'
-          aria-label='LOGIC'
-          title='LOGIC'
-          className='inline-flex items-center'
-        >
-          <span className='ml-2 text-xl font-bold tracking-wide uppercase'>
-            <span className='relative  textBorder2 text-transparent bg-clip-text'>
-              GIG
+        {!session ? (
+          <Link href='/' className='inline-flex items-center'>
+            <span className='ml-2 text-xl font-bold tracking-wide uppercase'>
+              <span className='relative  textBorder2 text-transparent bg-clip-text'>
+                GIG
+              </span>
+              gly
             </span>
-            gly
+          </Link>
+        ) : (
+          <span className='ml-2 text-xl font-bold tracking-wide uppercase flex items-center justify-between'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={session.user.image}
+              alt=''
+              className='rounded-full h-10 sm:h-16  w-auto mr-6 border-2 p-2 border-[#777] border-dashed '
+            />{' '}
+            {<Greetings />}
           </span>
-        </Link>
+        )}
+
+        {/* ============================================= */}
         {/* Creating the navigation items */}
         <ul className='flex items-center hidden uppercase space-x-8 lg:flex '>
           {/* Mapping through an array of navigation items to create individual NavBarItem components */}
@@ -47,7 +72,6 @@ export const Navbar = (props) => {
             { title: 'unskilled workers', link: '#' },
             { title: 'skilled workers', link: '#' },
             { title: 'NFTs', link: '#' },
-            { title: 'Sign In', link: '#' },
           ].map((item, index) => (
             <NavBarItem
               key={item.title + index}
@@ -57,13 +81,13 @@ export const Navbar = (props) => {
           ))}
           {/* Conditionally rendering a Connect Wallet button based on whether the user is currently connected or not */}
           <li>
-            <p
-              className='inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide  transition duration-200 rounded shadow-md bg-[#000000] hover:bg-white hover:text-[#000000]  focus:shadow-outline focus:outline-none cursor-pointer text-white'
-              aria-label='Connected'
-              title='Connected'
+            <Link
+              href='/dashboard'
+              onClick={session ? handleSignout : handleSignin}
+              className='inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide transition duration-200 rounded shadow-md bg-[#000000] hover:bg-white hover:text-[#000000] focus:shadow-outline focus:outline-none cursor-pointer text-white'
             >
-              Sign Up
-            </p>
+              {session ? 'Sign out' : 'Get Started'}
+            </Link>
           </li>
         </ul>
 
@@ -91,7 +115,7 @@ export const Navbar = (props) => {
                       className='inline-flex items-center'
                     >
                       <span className='ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase'>
-                        LOGIC
+                        GIGGLY
                       </span>
                     </Link>
                   </div>
@@ -111,7 +135,6 @@ export const Navbar = (props) => {
                       { title: 'unskilled workers', link: '#' },
                       { title: 'skilled workers', link: '#' },
                       { title: 'NFTs', link: '#' },
-                      { title: 'Sign In', link: '#' },
                     ].map((item, index) => (
                       <NavBarItem
                         key={item.title + index}
@@ -120,31 +143,13 @@ export const Navbar = (props) => {
                       />
                     ))}
                     <li>
-                      <p
-                        className='inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide  transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none cursor-pointer'
-                        aria-label='Connected'
-                        title='Connected'
+                      <Link
+                        href='/dashboard'
+                        onClick={session ? handleSignout : handleSignin}
+                        className='inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide text-white transition duration-200 rounded shadow-md bg-black focus:shadow-outline focus:outline-none cursor-pointer'
                       >
-                        Sign up
-                      </p>
-                      {/* {props.walletConnected() ? (
-                        <p
-                          className='inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide  transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none cursor-pointer'
-                          aria-label='Connected'
-                          title='Connected'
-                        >
-                          Wallet Connected
-                        </p>
-                      ) : (
-                        <p
-                          className='inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide  transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none cursor-pointer'
-                          aria-label='Connect Wallet'
-                          title='Connect Wallet'
-                          onClick={() => props.connect()}
-                        >
-                          Connect Wallet
-                        </p>
-                      )} */}
+                        {session ? 'Sign out' : 'Get Started'}
+                      </Link>
                     </li>
                   </ul>
                 </nav>
